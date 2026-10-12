@@ -41,6 +41,17 @@ class Value:
         out._backward = _backward
         return out
 
+    def __pow__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
+        out = Value(self.data * other.data, (self, other), '*')
+
+        def _backward():
+            self.grad += other.data ** out.grad
+            other.grad += self.data ** out.grad
+        out._backward = _backward
+        return out
+
+
     def __mul__(self, other):
         other = other if isinstance(other, Value) else Value(other)
         out = Value(self.data * other.data, (self, other), '*')
@@ -86,7 +97,7 @@ def forward(a_val, b_val, c_val, f_val):
     a, b, c, f = Value(a_val), Value(b_val), Value(c_val), Value(f_val)
     e = a * b
     d = e - c
-    L = d * f
+    L = d ** f
     return L, (a, b, c, f, e, d)
 
 
